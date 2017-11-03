@@ -12,17 +12,13 @@
 import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdStats;
-import edu.princeton.cs.algs4.Stopwatch;
 
 public class PercolationStats {
     private int trials;
     private double[] thresholds;
-    private Stopwatch watch;
 
     // perform trials independent experiments on an n-by-n grid
     public PercolationStats(int n, int t) {
-        watch = new Stopwatch();
-
         if (n <= 0 || t <= 0)
             throw new IllegalArgumentException();
 
@@ -73,7 +69,5 @@ public class PercolationStats {
         StdOut.println("95% confidence interval\t= [" 
                            + percStats.confidenceLo() + ", " 
                            + percStats.confidenceHi() + "]");
-        StdOut.println("avg. time (s)\t\t= " 
-                           + (double)(percStats.watch.elapsedTime() / trials));
     }
 }
