@@ -13,20 +13,25 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
     // the n-length of the grid
-    private int length;
-    private int virtualTop;
-    private int virtualBottom;
+    private final int length;
+    private final int virtualTop;
+    private final int virtualBottom;
     // the sites states where 0 is blocked and 1 is open
-    private int[] sitesState;
+    private boolean[] sitesState;
+    private int openSitesCount;
     // the sites connections
-    private WeightedQuickUnionUF sites;
+    private final WeightedQuickUnionUF sites;
 
     // create n-by-n grid, with all sites blocked
     public Percolation(int n) {
+        if (n < 1)
+            throw new IllegalArgumentException();
+        
         length = n;
         virtualTop = n * n;
         virtualBottom = virtualTop + 1;
-        sitesState = new int[n * n];
+        sitesState = new boolean[n * n];
+        openSitesCount = 0;
         sites = new WeightedQuickUnionUF(n * n + 2);
     }
 
@@ -38,13 +43,18 @@ public class Percolation {
     }
 
     // open site (row, col) if it is not open already
-    public void open(int row, int col) {        
+    public void open(int row, int col) {
+        if (row < 1 || col < 1)
+            throw new IllegalArgumentException();
+        
         if (isOpen(row, col))
             return;
-
+        
+        openSitesCount += 1;
+        
         int cellIndex = convertCoordinatesToIndex(row, col);
         
-        sitesState[cellIndex] = 1;
+        sitesState[cellIndex] = true;
 
         // if there's no site above, connect to the virtual top 
         if (row == 1)
@@ -71,23 +81,21 @@ public class Percolation {
 
     // is site (row, col) open?
     public boolean isOpen(int row, int col) {
-        return sitesState[convertCoordinatesToIndex(row, col)] == 1;
+        if (row < 1 || col < 1)
+            throw new IllegalArgumentException();
+        return sitesState[convertCoordinatesToIndex(row, col)];
     }
 
     // is site (row, col) full?
     public boolean isFull(int row, int col) {
+        if (row < 1 || col < 1)
+            throw new IllegalArgumentException();
         return sites.connected(convertCoordinatesToIndex(row, col), virtualTop);
     }
 
     // number of open sites
     public int numberOfOpenSites() {
-        int count = 0;
-
-        for (int i = 0; i < sitesState.length; i++)
-            if (sitesState[i] > 0) 
-                count++;
-
-        return count;
+        return openSitesCount;
     }
 
     // does the system percolate?
@@ -97,5 +105,6 @@ public class Percolation {
 
     // test client (optional)
     public static void main(String[] args) {
+        // intentionally left emtpy
     }
 }
