@@ -102,12 +102,16 @@ public class Deque<Item> implements Iterable<Item> {
         Item item = first.item;
         first = first.next;
         
-        if (size == 1) {
+        size--;
+        
+        if (size == 1)
+            first = last;
+        else if (size == 0) {
             last = null;
             first = null;
         }
         
-        size--;
+
         return item;
     }
 
@@ -119,12 +123,16 @@ public class Deque<Item> implements Iterable<Item> {
         Item item = last.item;
         last = last.prev;
         
-        if (size == 1) {
+        size--;
+        
+        if (size == 1)
+            last = first;
+        else if (size == 0) {
             last = null;
             first = null;
         }
         
-        size--;
+
         return item;
     }
 

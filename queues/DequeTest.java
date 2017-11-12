@@ -1,3 +1,4 @@
+import edu.princeton.cs.algs4.StdOut;
 import junit.framework.TestCase;
 import java.util.Iterator;
 
@@ -73,4 +74,21 @@ public class DequeTest extends TestCase {
         assertTrue(deque.size() == 0);
         assertTrue(deque.isEmpty());
     }
+    
+    public void testMultipleOperations() {
+        Deque<Integer> deque = new Deque<Integer>();
+        assertTrue(deque.isEmpty());
+        deque.addFirst(1);
+        assertFalse(deque.isEmpty());
+        assertTrue(deque.removeLast() == 1);
+        deque.addFirst(4);
+        assertTrue(deque.removeLast() == 4);
+        assertTrue(deque.isEmpty());
+        deque.addFirst(7);
+        deque.addFirst(8);
+        assertTrue(deque.removeLast() == 7);
+        assertFalse(deque.isEmpty());
+        assertTrue(deque.removeLast() == 8);
+    }
+        
 }
