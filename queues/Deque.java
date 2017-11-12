@@ -1,5 +1,14 @@
+/******************************************************************************
+ *  Compilation:  javac Deque.java
+ *  Execution:    java Deque input.txt
+ *  Dependencies: Iterator.java, NoSuchElementException.java
+ * 
+ *  Name: Jonathan Experton
+ *  Date: nov. 11 2017
+ *  Purpose: Deque implementation
+ * 
+ ******************************************************************************/
 import java.util.Iterator;
-import edu.princeton.cs.algs4.StdOut;
 import java.util.NoSuchElementException;
     
 public class Deque<Item> implements Iterable<Item> {
@@ -8,8 +17,8 @@ public class Deque<Item> implements Iterable<Item> {
     private int size = 0;
     
     private class Node {
-        Node next, prev;
-        Item item;
+        private Node next, prev;
+        private Item item;
     }
     
     private class DequeIterator implements Iterator<Item> {
@@ -92,7 +101,8 @@ public class Deque<Item> implements Iterable<Item> {
         first = first.next;
         
         if (size == 1) {
-            last = first = null;
+            last = null;
+            first = null;
         }
         
         --size;
@@ -108,7 +118,8 @@ public class Deque<Item> implements Iterable<Item> {
         last = last.prev;
         
         if (size == 1) {
-            last = first = null;
+            last = null;
+            first = null;
         }
         
         --size;

@@ -1,7 +1,6 @@
 import junit.framework.TestCase;
 import java.util.Iterator;
 
-
 /**
  * A JUnit test case class.
  * Every method starting with the word "test" will be called when running
