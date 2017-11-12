@@ -99,8 +99,10 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         
         // replace the dequeued item with the last item of the queue
         // to avoid null values when i < size and keep dequeue() and next() constant
-        if (size > 0)
+        if (size > 0) {
             stack[i] = stack[size];
+            stack[size] = null;
+        }
         
         if (size > 0 && size == stack.length / 4) 
             resize(stack.length / 2);
