@@ -1,6 +1,6 @@
 /******************************************************************************
  *  Compilation:  javac Deque.java
- *  Execution:    java Deque input.txt
+ *  Execution:    
  *  Dependencies: Iterator.java, NoSuchElementException.java
  * 
  *  Name: Jonathan Experton
@@ -133,5 +133,6 @@ public class Deque<Item> implements Iterable<Item> {
 
     // unit testing (optional)
     public static void main(String[] args) {
+        // intentionally left emtpy 
     }
 }
