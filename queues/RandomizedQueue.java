@@ -21,7 +21,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     private class RandomizedQueueIterator implements Iterator<Item> {
         
         private int current = 0;
-        private int[] indexes = new int[size];
+        private final int[] indexes = new int[size];
         
         public RandomizedQueueIterator() {
             for (int i = 0; i < size; i++)

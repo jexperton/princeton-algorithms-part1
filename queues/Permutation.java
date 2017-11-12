@@ -20,7 +20,7 @@ public class Permutation {
         while (!StdIn.isEmpty())
             queue.enqueue(StdIn.readString());
         
-        Iterator iterator = queue.iterator();
+        Iterator<String> iterator = queue.iterator();
         
         for (int i = 0; i < Integer.parseInt(args[0]); i++)
             StdOut.println(iterator.next());
