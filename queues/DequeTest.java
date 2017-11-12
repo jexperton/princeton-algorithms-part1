@@ -1,4 +1,3 @@
-import edu.princeton.cs.algs4.StdOut;
 import junit.framework.TestCase;
 import java.util.Iterator;
 
