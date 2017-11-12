@@ -75,7 +75,7 @@ public class DequeTest extends TestCase {
         assertTrue(deque.isEmpty());
     }
     
-    public void testMultipleOperations() {
+    public void testMultipleOperations1() {
         Deque<Integer> deque = new Deque<Integer>();
         assertTrue(deque.isEmpty());
         deque.addFirst(1);
@@ -89,6 +89,20 @@ public class DequeTest extends TestCase {
         assertTrue(deque.removeLast() == 7);
         assertFalse(deque.isEmpty());
         assertTrue(deque.removeLast() == 8);
+    }
+    
+    public void testMultipleOperations2() {
+        Deque<Integer> deque = new Deque<Integer>();
+         deque.addFirst(0);
+         deque.addFirst(1);
+         deque.addFirst(2);
+         deque.addFirst(3);
+         deque.addFirst(4);
+         deque.addFirst(5);
+         deque.addFirst(6);
+         assertTrue(deque.removeLast() == 0);
+         deque.addFirst(8);
+         assertTrue(deque.removeLast() == 1);
     }
         
 }
