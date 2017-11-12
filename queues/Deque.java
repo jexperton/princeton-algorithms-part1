@@ -8,6 +8,7 @@
  *  Purpose: Deque implementation
  * 
  ******************************************************************************/
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
     
@@ -22,6 +23,7 @@ public class Deque<Item> implements Iterable<Item> {
     }
     
     private class DequeIterator implements Iterator<Item> {
+        
         private Node current = first;
 
         public boolean hasNext() { 
@@ -105,7 +107,7 @@ public class Deque<Item> implements Iterable<Item> {
             first = null;
         }
         
-        --size;
+        size--;
         return item;
     }
 
@@ -122,7 +124,7 @@ public class Deque<Item> implements Iterable<Item> {
             first = null;
         }
         
-        --size;
+        size--;
         return item;
     }
 
