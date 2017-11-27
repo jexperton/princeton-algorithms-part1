@@ -13,43 +13,55 @@ import edu.princeton.cs.algs4.StdDraw;
 
 public class BruteCollinearPoints {
     
-    private Point[] pointSet;
+    private final int n;
+    private final Point[] points;
     
     // finds all line segments containing 4 points
     public BruteCollinearPoints(Point[] points) {
-        if (points == null || points.length == 0) {
+        if (points == null || points.length == 0)
             throw new IllegalArgumentException();
-        }
-        pointSet = points;
         
-        Arrays.sort(pointSet);
+        this.n = points.length;
+        this.points = new Point[this.n];
+        
+        for (int i = 0; i < this.n; i++) {
+            if (points[i] == null)
+                throw new IllegalArgumentException();
+                
+            this.points[i] = points[i];
+        }
+        
+        Arrays.sort(this.points);
+        
+        for (int i = 1; i < this.n; i++)
+            if (this.points[i - 1].compareTo(this.points[i]) == 0)
+                throw new IllegalArgumentException();
     }
 
     // the number of line segments
     public int numberOfSegments() {
-        return segments().length;
+        return this.segments().length;
     }
     
     // the line segments
     public LineSegment[] segments() {
         ArrayList<LineSegment> segmentsList = new ArrayList<LineSegment>();
         
-        for (int p = 0; p < pointSet.length; p++) {
-            for (int q = p + 1; q < pointSet.length; q++) {
-                double slope = pointSet[p].slopeTo(pointSet[q]);
-                for (int r = q + 1; r < pointSet.length; r++) {
-                    if (slope == pointSet[q].slopeTo(pointSet[r])) {
-                        for (int s = r + 1; s < pointSet.length; s++) {
-                            if (slope == pointSet[r].slopeTo(pointSet[s]) ) {
-                                segmentsList.add(new LineSegment(pointSet[p], 
-                                                                 pointSet[s]));
-                            }   
-                        } 
+        for (int p = 0; p < this.n; p++) {
+            for (int q = p + 1; q < this.n; q++) {
+                double slope = this.points[p].slopeTo(this.points[q]);
+                for (int r = q + 1; r < this.n; r++) {
+                    if (slope == this.points[q].slopeTo(this.points[r])) {
+                        for (int s = r + 1; s < this.n; s++) {
+                            if (slope == this.points[r].slopeTo(this.points[s])) {
+                                segmentsList.add(new LineSegment(this.points[p], this.points[s]));
+                            }
+                        }
                     }
-                }   
+                }
             }
         } 
-      
+        
         return segmentsList.toArray(new LineSegment[segmentsList.size()]);
     }
 

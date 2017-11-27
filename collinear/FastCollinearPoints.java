@@ -13,16 +13,29 @@ import edu.princeton.cs.algs4.StdDraw;
 
 public class FastCollinearPoints {
     
-    private Point[] pointSet;
+    private final int n;
+    private final Point[] points;
         
     // finds all line segments containing 4 or more points
     public FastCollinearPoints(Point[] points) {
-        if (points == null || points.length == 0) {
+        if (points == null || points.length == 0)
             throw new IllegalArgumentException();
-        }
-        pointSet = points;
         
-        // Arrays.sort(pointSet);
+        this.n = points.length;
+        this.points = new Point[this.n];
+        
+        for (int i = 0; i < this.n; i++) {
+            if (points[i] == null)
+                throw new IllegalArgumentException();
+                
+            this.points[i] = points[i];
+        }
+        
+        Arrays.sort(this.points);
+        
+        for (int i = 1; i < this.n; i++)
+            if (this.points[i - 1].compareTo(this.points[i]) == 0)
+                throw new IllegalArgumentException();
     }
         
     // the number of line segments
@@ -34,36 +47,25 @@ public class FastCollinearPoints {
     public LineSegment[] segments() {
         ArrayList<LineSegment> segmentsList = new ArrayList<LineSegment>();
         
-        for (int i = 0; i < pointSet.length; i++) {
-            Arrays.sort(pointSet, pointSet[i].slopeOrder());
-            ArrayList<Point> collinearPoints = new ArrayList<Point>();
+        for (int  i = 0; i < this.n; i++) {
+            Point center = this.points[i];
+            Point[] candidates = Arrays.copyOf(this.points, this.n);
             
-            for (int j = 0; j < pointSet.length - 1; j++) {
-                if (pointSet[i].compareTo(pointSet[j]) == 0)
-                    continue;
-                
-                if (collinearPoints.size() == 0) {
-                    collinearPoints.add(pointSet[j]);
-                    continue;
+            for (int k = i; k < this.n - 1; k++)
+                candidates[k] = this.points[k + 1];
+            
+            Arrays.sort(candidates, 0, this.n - 1, center.slopeOrder());
+            
+            int start = 0;
+
+            for (int j = 1; j < this.n; j++) {
+                if (j == this.n - 1 || center.slopeTo(candidates[start]) != center.slopeTo(candidates[j])) {
+                    if (j - start > 2 && candidates[start].compareTo(center) > 0)
+                        segmentsList.add(new LineSegment(center, candidates[j - 1]));
+                    start = j;
                 }
-                
-                if (pointSet[i].slopeTo(pointSet[j]) == pointSet[i].slopeTo(collinearPoints.get(0)))
-                    collinearPoints.add(pointSet[j]);
             }
-            
-            if (collinearPoints.size() < 3)
-                continue;
-            
-            collinearPoints.add(pointSet[i]);
-            
-            Point[] collinears = collinearPoints.toArray(new Point[collinearPoints.size()]);
-            Arrays.sort(collinears);
-            
-            segmentsList.add(new LineSegment(collinears[0], collinears[collinears.length - 1]));
-                
-        } 
-        
-        StdOut.println(segmentsList.toArray(new LineSegment[segmentsList.size()]));
+        }
       
         return segmentsList.toArray(new LineSegment[segmentsList.size()]);
     }
