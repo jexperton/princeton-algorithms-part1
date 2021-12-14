@@ -7,7 +7,7 @@
  *  From that file, it
  *
  *    - Reads the grid size n of the percolation system.
- *    - Creates an n-by-n grid of sites (intially all blocked)
+ *    - Creates an n-by-n grid of sites (initially all blocked)
  *    - Reads in a sequence of sites (row i, column j) to open.
  *
  *  After each site is opened, it draws full sites in light blue,
@@ -16,23 +16,23 @@
  *
  ******************************************************************************/
 
-import java.awt.Font;
-
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
 
+import java.awt.Font;
+
 public class PercolationVisualizer {
 
-    // delay in miliseconds (controls animation speed)
-    private static final int DELAY = 20;
+    // delay in milliseconds (controls animation speed)
+    private static final int DELAY = 100;
 
     // draw n-by-n percolation system
     public static void draw(Percolation perc, int n) {
         StdDraw.clear();
         StdDraw.setPenColor(StdDraw.BLACK);
-        StdDraw.setXscale(-0.05*n, 1.05*n);
-        StdDraw.setYscale(-0.05*n, 1.05*n);   // leave a border to write text
-        StdDraw.filledSquare(n/2.0, n/2.0, n/2.0);
+        StdDraw.setXscale(-0.05 * n, 1.05 * n);
+        StdDraw.setYscale(-0.05 * n, 1.05 * n);   // leave a border to write text
+        StdDraw.filledSquare(n / 2.0, n / 2.0, n / 2.0);
 
         // draw n-by-n grid
         int opened = 0;
@@ -55,9 +55,9 @@ public class PercolationVisualizer {
         // write status text
         StdDraw.setFont(new Font("SansSerif", Font.PLAIN, 12));
         StdDraw.setPenColor(StdDraw.BLACK);
-        StdDraw.text(0.25*n, -0.025*n, opened + " open sites");
-        if (perc.percolates()) StdDraw.text(0.75*n, -0.025*n, "percolates");
-        else                   StdDraw.text(0.75*n, -0.025*n, "does not percolate");
+        StdDraw.text(0.25 * n, -0.025 * n, opened + " open sites");
+        if (perc.percolates()) StdDraw.text(0.75 * n, -0.025 * n, "percolates");
+        else StdDraw.text(0.75 * n, -0.025 * n, "does not percolate");
 
     }
 
@@ -83,3 +83,4 @@ public class PercolationVisualizer {
         }
     }
 }
+
