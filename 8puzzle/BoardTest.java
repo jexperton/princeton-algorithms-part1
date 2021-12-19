@@ -9,9 +9,7 @@ public class BoardTest extends TestCase {
 
     public void testToString() {
         int[][] args = new int[][] {
-                new int[] { 8, 1, 3 },
-                new int[] { 4, 0, 2 },
-                new int[] { 7, 6, 5 }
+                new int[] { 8, 1, 3 }, new int[] { 4, 0, 2 }, new int[] { 7, 6, 5 }
         };
         Board board = new Board(args);
 
@@ -20,9 +18,7 @@ public class BoardTest extends TestCase {
 
     public void testHamming() {
         int[][] args = new int[][] {
-                new int[] { 8, 1, 3 },
-                new int[] { 4, 0, 2 },
-                new int[] { 7, 6, 5 }
+                new int[] { 8, 1, 3 }, new int[] { 4, 0, 2 }, new int[] { 7, 6, 5 }
         };
         Board board = new Board(args);
 
@@ -31,9 +27,7 @@ public class BoardTest extends TestCase {
 
     public void testManhattan() {
         int[][] args = new int[][] {
-                new int[] { 8, 1, 3 },
-                new int[] { 4, 0, 2 },
-                new int[] { 7, 6, 5 }
+                new int[] { 8, 1, 3 }, new int[] { 4, 0, 2 }, new int[] { 7, 6, 5 }
         };
         Board board = new Board(args);
 
@@ -42,21 +36,15 @@ public class BoardTest extends TestCase {
 
     public void testEquals() {
         int[][] args = new int[][] {
-                new int[] { 8, 1, 3 },
-                new int[] { 4, 0, 2 },
-                new int[] { 7, 6, 5 }
+                new int[] { 8, 1, 3 }, new int[] { 4, 0, 2 }, new int[] { 7, 6, 5 }
         };
         Board board = new Board(args);
         int[][] equalArgs = new int[][] {
-                new int[] { 8, 1, 3 },
-                new int[] { 4, 0, 2 },
-                new int[] { 7, 6, 5 }
+                new int[] { 8, 1, 3 }, new int[] { 4, 0, 2 }, new int[] { 7, 6, 5 }
         };
         Board equalBoard = new Board(equalArgs);
         int[][] notEqualArgs = new int[][] {
-                new int[] { 8, 1, 6 },
-                new int[] { 4, 0, 2 },
-                new int[] { 7, 3, 5 }
+                new int[] { 8, 1, 6 }, new int[] { 4, 0, 2 }, new int[] { 7, 3, 5 }
         };
         Board notEqualBoard = new Board(notEqualArgs);
 
@@ -66,15 +54,11 @@ public class BoardTest extends TestCase {
 
     public void testIsGoal() {
         int[][] notSolvedArgs = new int[][] {
-                new int[] { 8, 1, 3 },
-                new int[] { 4, 0, 2 },
-                new int[] { 7, 6, 5 }
+                new int[] { 8, 1, 3 }, new int[] { 4, 0, 2 }, new int[] { 7, 6, 5 }
         };
         Board notSolvedBoard = new Board(notSolvedArgs);
         int[][] solvedArgs = new int[][] {
-                new int[] { 1, 2, 3 },
-                new int[] { 4, 5, 6 },
-                new int[] { 7, 8, 0 }
+                new int[] { 1, 2, 3 }, new int[] { 4, 5, 6 }, new int[] { 7, 8, 0 }
         };
         Board solvedBoard = new Board(solvedArgs);
 
@@ -82,21 +66,47 @@ public class BoardTest extends TestCase {
         assertEquals(solvedBoard.isGoal(), true);
     }
 
-    public void testNeighbors() {
+    public void test4Neighbors() {
         int i = 0;
         int[][] args = new int[][] {
-                new int[] { 8, 1, 3 },
-                new int[] { 4, 0, 2 },
-                new int[] { 7, 6, 5 }
+                new int[] { 8, 1, 3 }, new int[] { 4, 0, 2 }, new int[] { 7, 6, 5 }
         };
         Board board = new Board(args);
         Iterable<Board> neightbors = board.neighbors();
         String[] out = {
-                "3\n 8 1 3\n 4 2 0\n 7 6 5",
-                "3\n 8 0 3\n 4 1 2\n 7 6 5",
-                "3\n 8 1 3\n 0 4 2\n 7 6 5",
-                "3\n 8 1 3\n 4 6 2\n 7 0 5"
+                "3\n 8 1 3\n 4 2 0\n 7 6 5", "3\n 8 0 3\n 4 1 2\n 7 6 5",
+                "3\n 8 1 3\n 0 4 2\n 7 6 5", "3\n 8 1 3\n 4 6 2\n 7 0 5"
         };
+
+        for (Board neightbor : neightbors)
+            assertEquals(neightbor.toString(), out[i++]);
+    }
+
+    public void test2Neighbors() {
+        int i = 0;
+        int[][] args = new int[][] {
+                new int[] { 8, 1, 0 }, new int[] { 4, 3, 2 }, new int[] { 7, 6, 5 }
+        };
+        Board board = new Board(args);
+        Iterable<Board> neightbors = board.neighbors();
+        String[] out = {
+                "3\n 8 0 1\n 4 3 2\n 7 6 5", "3\n 8 1 0\n 4 3 0\n 7 6 5",
+                };
+
+        for (Board neightbor : neightbors)
+            assertEquals(neightbor.toString(), out[i++]);
+    }
+
+    public void test2Neighbors2N() {
+        int i = 0;
+        int[][] args = new int[][] {
+                new int[] { 1, 0 }, new int[] { 3, 2 },
+                };
+        Board board = new Board(args);
+        Iterable<Board> neightbors = board.neighbors();
+        String[] out = {
+                "3\n 0 1\n 3 2", "3\n 1 2\n 3 0",
+                };
 
         for (Board neightbor : neightbors)
             assertEquals(neightbor.toString(), out[i++]);
@@ -104,9 +114,7 @@ public class BoardTest extends TestCase {
 
     public void testTwin() {
         int[][] args = new int[][] {
-                new int[] { 1, 2, 3 },
-                new int[] { 4, 5, 6 },
-                new int[] { 7, 8, 0 }
+                new int[] { 1, 2, 3 }, new int[] { 4, 5, 6 }, new int[] { 7, 8, 0 }
         };
         Board board = new Board(args);
 
@@ -125,7 +133,8 @@ public class BoardTest extends TestCase {
         board.testManhattan();
         board.testEquals();
         board.testIsGoal();
-        board.testNeighbors();
+        board.test4Neighbors();
+        board.test2Neighbors();
         board.testTwin();
     }
 }

@@ -10,6 +10,7 @@ public class Board {
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
     public Board(int[][] tiles) {
+        if (tiles == null) throw new IllegalArgumentException();
         this.tiles = this.copy(tiles);
     }
 
@@ -79,14 +80,9 @@ public class Board {
 
     // does this board equal y?
     public boolean equals(Object y) {
-        if (y == null || y.getClass() == null) return false;
-        if (!this.getClass().equals(y.getClass())) return false;
-        if (this.toString().equals(y.toString())) return true;
-        return false;
-    }
-
-    enum Direction {
-        RIGHT, TOP, LEFT, BOTTOM
+        if (y == null || !this.getClass().equals(y.getClass())) return false;
+        if (y == this) return true;
+        return Arrays.deepEquals(this.tiles, ((Board) y).tiles);
     }
 
     // all neighboring boards
@@ -94,32 +90,26 @@ public class Board {
         int n = this.dimension();
         ArrayList<Board> neighbors = new ArrayList<Board>(0);
 
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (this.tiles[i][j] != 0) continue;
-                if (j < n - 1) neighbors.add(this.move(i, j, Direction.RIGHT));
-                if (i > 0) neighbors.add(this.move(i, j, Direction.TOP));
-                if (j > 0) neighbors.add(this.move(i, j, Direction.LEFT));
-                if (i < n - 1) neighbors.add(this.move(i, j, Direction.BOTTOM));
-                return neighbors;
-            }
-        }
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (this.tiles[i][j] == 0) {
+                    if (j < n - 1) neighbors.add(this.move(i, j, Direction.RIGHT));
+                    if (i > 0) neighbors.add(this.move(i, j, Direction.TOP));
+                    if (j > 0) neighbors.add(this.move(i, j, Direction.LEFT));
+                    if (i < n - 1) neighbors.add(this.move(i, j, Direction.BOTTOM));
+                    return neighbors;
+                }
+
 
         return neighbors;
     }
 
+    private enum Direction {
+        RIGHT, TOP, LEFT, BOTTOM
+    }
 
     private Board move(int x, int y, Direction direction) {
-        int n = this.dimension();
         int[][] nextTiles = this.copy(this.tiles);
-
-        if (x == n - 1 && direction == Direction.RIGHT
-                || y == 0 && direction == Direction.TOP
-                || x == 0 && direction == Direction.LEFT
-                || y == n - 1 && direction == Direction.BOTTOM
-        ) {
-            throw new RuntimeException("out of bound");
-        }
 
         if (direction == Direction.RIGHT) {
             nextTiles[x][y] = this.tiles[x][y + 1];
@@ -148,41 +138,26 @@ public class Board {
         if (this.twin != null) return this.twin;
 
         int n = this.dimension();
-        Tile a = new Tile(
-                StdRandom.uniform(0, n - 1),
-                StdRandom.uniform(0, n - 1)
+        int ax = StdRandom.uniform(0, n);
+        int ay = StdRandom.uniform(0, n);
+        if (this.tiles[ax][ay] == 0) return this.twin();
 
-        );
-        Tile b = new Tile(
-                StdRandom.uniform(0, n - 1),
-                StdRandom.uniform(0, n - 1)
-        );
-
-        if (a.value == 0 || b.value == 0 || a.value == b.value) {
+        int bx = StdRandom.uniform(0, n);
+        int by = StdRandom.uniform(0, n);
+        if (this.tiles[bx][by] == 0 || this.tiles[ax][ay] == this.tiles[bx][by]) {
             return this.twin();
         }
 
         int[][] nextTiles = this.copy(this.tiles);
-        nextTiles[a.x][a.y] = this.tiles[b.x][b.y];
-        nextTiles[b.x][b.y] = this.tiles[a.x][a.y];
+        nextTiles[ax][ay] = this.tiles[bx][by];
+        nextTiles[bx][by] = this.tiles[ax][ay];
         this.twin = new Board(nextTiles);
 
         return this.twin;
     }
 
-    private class Tile {
-        public final int x;
-        public final int y;
-        public final int value;
-
-        Tile(int x, int y) {
-            this.x = x;
-            this.y = y;
-            this.value = tiles[x][y];
-        }
-    }
-
     // unit testing (not graded)
     public static void main(String[] args) {
+        // empty on purpose
     }
 }
