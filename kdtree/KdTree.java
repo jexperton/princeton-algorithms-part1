@@ -62,7 +62,25 @@ public class KdTree {
     }
 
     public Iterable<Point2D> range(RectHV rect) {
-        return new ArrayList<>();
+        return range(root, rect, new ArrayList<>());
+    }
+
+    private ArrayList<Point2D> range(Node node, RectHV rect, ArrayList<Point2D> pointsInRange) {
+        if (node == null) return pointsInRange;
+        if (rect.contains(node.point)) pointsInRange.add(node.point);
+        if (node.isVertical) {
+            if (node.lbTree != null && rect.xmin() < node.point.x())
+                range(node.lbTree, rect, pointsInRange);
+            if (node.rtTree != null && rect.xmax() > node.point.x())
+                range(node.rtTree, rect, pointsInRange);
+        }
+        else {
+            if (node.lbTree != null && rect.ymin() < node.point.y())
+                range(node.lbTree, rect, pointsInRange);
+            if (node.rtTree != null && rect.ymax() > node.point.y())
+                range(node.lbTree, rect, pointsInRange);
+        }
+        return pointsInRange;
     }
 
     public Point2D nearest(Point2D p) {
