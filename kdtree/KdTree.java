@@ -151,18 +151,12 @@ public class KdTree {
         draw(node.rtTree, node, parent, grandParent);
     }
 
-    private Double takeLowest(Double a, Double b) {
-        if (a == null && b == null) throw new IllegalArgumentException();
-        if (a == null) return b;
-        if (b == null) return a;
-        return a.compareTo(b) >= 0 ? b : a;
+    private double takeLowest(double a, double b) {
+        return a > b ? b : a;
     }
 
-    private Double takeGreatest(Double a, Double b) {
-        if (a == null && b == null) throw new IllegalArgumentException();
-        if (a == null) return b;
-        if (b == null) return a;
-        return a.compareTo(b) >= 0 ? a : b;
+    private double takeGreatest(double a, double b) {
+        return a > b ? a : b;
     }
 
     public static void main(String[] args) {
