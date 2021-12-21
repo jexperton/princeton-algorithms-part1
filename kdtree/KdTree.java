@@ -42,21 +42,18 @@ public class KdTree {
     private void insert(Node parent, Point2D insertedPoint) {
         if (parent == null || insertedPoint == null) throw new IllegalArgumentException();
         if (parent.point.equals(insertedPoint)) return;
-        if (parent.isVertical) {
-            if (insertedPoint.x() > parent.point.x()) {
+        if (parent.isVertical)
+            if (insertedPoint.x() > parent.point.x())
                 if (parent.rtTree == null) parent.rtTree = new Node(insertedPoint, false);
                 else insert(parent.rtTree, insertedPoint);
-            }
             else {
                 if (parent.lbTree == null) parent.lbTree = new Node(insertedPoint, false);
                 else insert(parent.lbTree, insertedPoint);
             }
-        }
         else {
-            if (insertedPoint.y() > parent.point.y()) {
+            if (insertedPoint.y() > parent.point.y())
                 if (parent.rtTree == null) parent.rtTree = new Node(insertedPoint, true);
                 else insert(parent.rtTree, insertedPoint);
-            }
             else {
                 if (parent.lbTree == null) parent.lbTree = new Node(insertedPoint, true);
                 else insert(parent.lbTree, insertedPoint);
@@ -82,7 +79,6 @@ public class KdTree {
 
         Point2D parentPoint = parent == null ? null : parent.point;
         Point2D grandGrandParentPoint = grandGrandParent == null ? null : grandGrandParent.point;
-
 
         if (node.isVertical) {
             StdDraw.setPenColor(StdDraw.RED);
