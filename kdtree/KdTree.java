@@ -93,7 +93,11 @@ public class KdTree {
         return range(root, rect, new ArrayList<>());
     }
 
-    private ArrayList<Point2D> range(Node node, RectHV rect, ArrayList<Point2D> pointsInRange) {
+    private ArrayList<Point2D> range(
+            Node node,
+            RectHV rect,
+            ArrayList<Point2D> pointsInRange
+    ) {
         if (node == null) return pointsInRange;
         if (rect.contains(node.point)) pointsInRange.add(node.point);
         if (node.isVertical) {
@@ -111,9 +115,93 @@ public class KdTree {
         return pointsInRange;
     }
 
-    public Point2D nearest(Point2D p) {
-        return p;
+    public Point2D nearest(Point2D searchPoint) {
+        return nearest(root, searchPoint, null, Double.POSITIVE_INFINITY);
     }
+
+
+    private Point2D nearest(
+            Node node,
+            Point2D searchPoint,
+            Point2D nearestPoint,
+            double nearestDistance
+    ) {
+        if (searchPoint == null) throw new IllegalArgumentException();
+        if (node == null) return nearestPoint;
+        if (nearestPoint == null) nearestPoint = node.point;
+        if (nearestDistance == Double.POSITIVE_INFINITY)
+            nearestDistance = searchPoint.distanceSquaredTo(nearestPoint);
+        boolean shouldTakeLeft = node.isVertical
+                                 ? searchPoint.x() < node.point.x()
+                                 : searchPoint.y() < node.point.y();
+        double pointDistance = searchPoint.distanceSquaredTo(node.point);
+        if (pointDistance < nearestDistance) {
+            nearestPoint = node.point;
+            nearestDistance = pointDistance;
+        }
+
+        if (shouldTakeLeft) {
+            Point2D nearestLeft = nearest(
+                    node.lbTree,
+                    searchPoint,
+                    nearestPoint,
+                    nearestDistance);
+            double nearestLeftDistance = searchPoint.distanceSquaredTo(nearestLeft);
+            if (nearestLeftDistance < nearestDistance) {
+                nearestPoint = nearestLeft;
+                nearestDistance = nearestLeftDistance;
+            }
+            // |a-b| = |b-a| -> (a-b)² = (b-a)²
+            if (getPointToAxisDistance(node, searchPoint) < nearestDistance) {
+                // might worth checking the opposite tree
+                Point2D nearestRight = nearest(
+                        node.rtTree,
+                        searchPoint,
+                        nearestPoint,
+                        nearestDistance);
+                double nearestRightDistance = searchPoint.distanceSquaredTo(nearestRight);
+                if (nearestRightDistance < nearestDistance) {
+                    nearestPoint = nearestRight;
+                    nearestDistance = nearestRightDistance;
+                }
+            }
+        }
+        else {
+            Point2D nearestRight = nearest(
+                    node.rtTree,
+                    searchPoint,
+                    nearestPoint,
+                    nearestDistance);
+            double nearestRightDistance = searchPoint.distanceSquaredTo(nearestRight);
+            if (nearestRightDistance < nearestDistance) {
+                nearestPoint = nearestRight;
+                nearestDistance = nearestRightDistance;
+            }
+
+            if (getPointToAxisDistance(node, searchPoint) < nearestDistance) {
+                // might worth checking the opposite tree
+                Point2D nearestLeft = nearest(
+                        node.lbTree,
+                        searchPoint,
+                        nearestPoint,
+                        nearestDistance);
+                double nearestLeftDistance = searchPoint.distanceSquaredTo(nearestLeft);
+                if (nearestLeftDistance < nearestDistance) {
+                    nearestPoint = nearestLeft;
+                    nearestDistance = nearestLeftDistance;
+                }
+            }
+        }
+
+        return nearestPoint;
+    }
+
+    private double getPointToAxisDistance(Node node, Point2D searchPoint) {
+        return node.isVertical
+               ? Math.pow(searchPoint.x() - node.point.x(), 2)
+               : Math.pow(searchPoint.y() - node.point.y(), 2);
+    }
+
 
     public void draw() {
         draw(root, null, null, null);

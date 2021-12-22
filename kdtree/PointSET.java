@@ -49,7 +49,7 @@ public class PointSET {
         if (p == null) throw new IllegalArgumentException();
         Point2D nearest = null;
         for (Point2D n : this.values)
-            if (nearest == null || nearest.distanceTo(p) > n.distanceTo(p))
+            if (nearest == null || n.distanceTo(p) < nearest.distanceTo(p))
                 nearest = n;
         return nearest;
     }
