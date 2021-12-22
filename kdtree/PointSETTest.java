@@ -1,6 +1,5 @@
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
-import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.StdRandom;
 import junit.framework.TestCase;
 
@@ -27,14 +26,8 @@ public class PointSETTest extends TestCase {
         RectHV rect = new RectHV(0.3, 0.3, 0.6, 0.6);
         for (Point2D p : points)
             brute.insert(p);
-        for (Point2D p : brute.range(rect)) {
-            StdOut.println(p.toString());
-            assertEquals(p.x() <= rect.xmax(), true);
-            assertEquals(p.x() >= rect.xmin(), true);
-            assertEquals(p.y() <= rect.ymax(), true);
-            assertEquals(p.y() >= rect.ymin(), true);
-
-        }
+        for (Point2D p : brute.range(rect))
+            assertEquals(rect.contains(p), true);
     }
 
 

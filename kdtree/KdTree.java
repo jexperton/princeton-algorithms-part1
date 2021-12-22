@@ -6,10 +6,11 @@ import java.util.ArrayList;
 
 public class KdTree {
     private Node root;
+    private int size = 0;
 
     private static class Node {
-        private Point2D point;      // the point
-        private boolean isVertical; // the axis orientation corresponding to this node
+        private final Point2D point;      // the point
+        private final boolean isVertical; // the axis orientation corresponding to this node
         private Node lbTree = null; // the left/bottom subtree
         private Node rtTree = null; // the right/top subtree
 
@@ -20,7 +21,7 @@ public class KdTree {
     }
 
     public int size() {
-        return 1;
+        return size;
     }
 
     public boolean isEmpty() {
@@ -35,22 +36,18 @@ public class KdTree {
     private Node findNode(Node node, Point2D searchPoint) {
         if (searchPoint == null) throw new IllegalArgumentException();
         if (node == null) return null;
-        if (node.point.equals(searchPoint)) return node;
-        if (node.isVertical)
-            if (searchPoint.x() < node.point.x())
-                if (node.lbTree.point.equals(searchPoint)) return node.lbTree;
-                else findNode(node.lbTree, searchPoint);
-            else {
-                if (node.rtTree.point.equals(searchPoint)) return node.rtTree;
-                else findNode(node.rtTree, searchPoint);
-            }
+        if (node.point == searchPoint) return node;
+        if (node.isVertical) {
+            if (searchPoint.x() < node.point.x() && node.lbTree != null)
+                return findNode(node.lbTree, searchPoint);
+            else if (searchPoint.x() >= node.point.x() && node.rtTree != null)
+                return findNode(node.rtTree, searchPoint);
+        }
         else {
-            if (searchPoint.y() < node.point.y())
-                if (node.lbTree.point.equals(searchPoint)) return node.lbTree;
-                else findNode(node.lbTree, searchPoint);
-            else {
-                if (node.rtTree.point.equals(searchPoint)) return node.rtTree;
-                else findNode(node.rtTree, searchPoint);
+            if (searchPoint.y() < node.point.y() && node.lbTree != null)
+                return findNode(node.lbTree, searchPoint);
+            else if (searchPoint.y() >= node.point.y() && node.rtTree != null) {
+                return findNode(node.rtTree, searchPoint);
             }
         }
         return null;
@@ -63,7 +60,10 @@ public class KdTree {
 
     public void insert(Point2D insertedPoint) {
         if (insertedPoint == null) throw new IllegalArgumentException();
-        if (root == null) root = new Node(insertedPoint, true);
+        if (root == null) {
+            root = new Node(insertedPoint, true);
+            size = 1;
+        }
         else insert(root, insertedPoint);
     }
 
@@ -72,18 +72,30 @@ public class KdTree {
         if (parent.point.equals(insertedPoint)) return;
         if (parent.isVertical)
             if (insertedPoint.x() < parent.point.x())
-                if (parent.lbTree == null) parent.lbTree = new Node(insertedPoint, false);
+                if (parent.lbTree == null) {
+                    parent.lbTree = new Node(insertedPoint, false);
+                    size++;
+                }
                 else insert(parent.lbTree, insertedPoint);
             else {
-                if (parent.rtTree == null) parent.rtTree = new Node(insertedPoint, false);
+                if (parent.rtTree == null) {
+                    parent.rtTree = new Node(insertedPoint, false);
+                    size++;
+                }
                 else insert(parent.rtTree, insertedPoint);
             }
         else {
             if (insertedPoint.y() < parent.point.y())
-                if (parent.lbTree == null) parent.lbTree = new Node(insertedPoint, true);
+                if (parent.lbTree == null) {
+                    parent.lbTree = new Node(insertedPoint, true);
+                    size++;
+                }
                 else insert(parent.lbTree, insertedPoint);
             else {
-                if (parent.rtTree == null) parent.rtTree = new Node(insertedPoint, true);
+                if (parent.rtTree == null) {
+                    parent.rtTree = new Node(insertedPoint, true);
+                    size++;
+                }
                 else insert(parent.rtTree, insertedPoint);
             }
         }
@@ -116,21 +128,19 @@ public class KdTree {
     }
 
     public Point2D nearest(Point2D searchPoint) {
-        return nearest(root, searchPoint, null, Double.POSITIVE_INFINITY);
+        return nearest(root, searchPoint, null);
     }
 
 
     private Point2D nearest(
             Node node,
             Point2D searchPoint,
-            Point2D nearestPoint,
-            double nearestDistance
+            Point2D nearestPoint
     ) {
         if (searchPoint == null) throw new IllegalArgumentException();
         if (node == null) return nearestPoint;
         if (nearestPoint == null) nearestPoint = node.point;
-        if (nearestDistance == Double.POSITIVE_INFINITY)
-            nearestDistance = searchPoint.distanceSquaredTo(nearestPoint);
+        double nearestDistance = searchPoint.distanceSquaredTo(nearestPoint);
         boolean shouldTakeLeft = node.isVertical
                                  ? searchPoint.x() < node.point.x()
                                  : searchPoint.y() < node.point.y();
@@ -141,11 +151,7 @@ public class KdTree {
         }
 
         if (shouldTakeLeft) {
-            Point2D nearestLeft = nearest(
-                    node.lbTree,
-                    searchPoint,
-                    nearestPoint,
-                    nearestDistance);
+            Point2D nearestLeft = nearest(node.lbTree, searchPoint, nearestPoint);
             double nearestLeftDistance = searchPoint.distanceSquaredTo(nearestLeft);
             if (nearestLeftDistance < nearestDistance) {
                 nearestPoint = nearestLeft;
@@ -154,24 +160,15 @@ public class KdTree {
             // |a-b| = |b-a| -> (a-b)² = (b-a)²
             if (getPointToAxisDistance(node, searchPoint) < nearestDistance) {
                 // might worth checking the opposite tree
-                Point2D nearestRight = nearest(
-                        node.rtTree,
-                        searchPoint,
-                        nearestPoint,
-                        nearestDistance);
-                double nearestRightDistance = searchPoint.distanceSquaredTo(nearestRight);
-                if (nearestRightDistance < nearestDistance) {
-                    nearestPoint = nearestRight;
-                    nearestDistance = nearestRightDistance;
+                Point2D nearestOpposite = nearest(node.rtTree, searchPoint, nearestPoint);
+                double nearestOppositeDistance = searchPoint.distanceSquaredTo(nearestOpposite);
+                if (nearestOppositeDistance < nearestDistance) {
+                    nearestPoint = nearestOpposite;
                 }
             }
         }
         else {
-            Point2D nearestRight = nearest(
-                    node.rtTree,
-                    searchPoint,
-                    nearestPoint,
-                    nearestDistance);
+            Point2D nearestRight = nearest(node.rtTree, searchPoint, nearestPoint);
             double nearestRightDistance = searchPoint.distanceSquaredTo(nearestRight);
             if (nearestRightDistance < nearestDistance) {
                 nearestPoint = nearestRight;
@@ -180,15 +177,10 @@ public class KdTree {
 
             if (getPointToAxisDistance(node, searchPoint) < nearestDistance) {
                 // might worth checking the opposite tree
-                Point2D nearestLeft = nearest(
-                        node.lbTree,
-                        searchPoint,
-                        nearestPoint,
-                        nearestDistance);
-                double nearestLeftDistance = searchPoint.distanceSquaredTo(nearestLeft);
-                if (nearestLeftDistance < nearestDistance) {
-                    nearestPoint = nearestLeft;
-                    nearestDistance = nearestLeftDistance;
+                Point2D nearestOpposite = nearest(node.lbTree, searchPoint, nearestPoint);
+                double nearestOppositeDistance = searchPoint.distanceSquaredTo(nearestOpposite);
+                if (nearestOppositeDistance < nearestDistance) {
+                    nearestPoint = nearestOpposite;
                 }
             }
         }
@@ -294,6 +286,6 @@ public class KdTree {
     }
 
     public static void main(String[] args) {
-
+        // empty on purpose
     }
 }

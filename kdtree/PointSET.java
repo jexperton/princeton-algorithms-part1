@@ -36,7 +36,6 @@ public class PointSET {
     public Iterable<Point2D> range(RectHV rect) {
         if (rect == null) throw new IllegalArgumentException();
         SET<Point2D> range = new SET<>();
-        if (rect.xmin() == rect.xmax() || rect.ymin() == rect.ymax()) return range;
         for (Point2D p : this.values)
             if (p.y() >= rect.ymin() && p.y() <= rect.ymax() && p.x() >= rect.xmin()
                     && p.x() <= rect.xmax())
@@ -49,7 +48,7 @@ public class PointSET {
         if (p == null) throw new IllegalArgumentException();
         Point2D nearest = null;
         for (Point2D n : this.values)
-            if (nearest == null || n.distanceTo(p) < nearest.distanceTo(p))
+            if (nearest == null || n.distanceSquaredTo(p) < nearest.distanceSquaredTo(p))
                 nearest = n;
         return nearest;
     }
