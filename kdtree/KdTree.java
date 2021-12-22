@@ -1,7 +1,6 @@
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.StdDraw;
-import edu.princeton.cs.algs4.StdOut;
 
 import java.util.ArrayList;
 
@@ -10,7 +9,7 @@ public class KdTree {
 
     private static class Node {
         private Point2D point;      // the point
-        private boolean isVertical; // the axis-aligned rectangle corresponding to this node
+        private boolean isVertical; // the axis orientation corresponding to this node
         private Node lbTree = null; // the left/bottom subtree
         private Node rtTree = null; // the right/top subtree
 
@@ -28,35 +27,64 @@ public class KdTree {
         return root == null;
     }
 
-    public boolean contains(Point2D p) {
-        return true;
+    private Node findNode(Point2D searchPoint) {
+        if (searchPoint == null) throw new IllegalArgumentException();
+        return findNode(root, searchPoint);
+    }
+
+    private Node findNode(Node node, Point2D searchPoint) {
+        if (searchPoint == null) throw new IllegalArgumentException();
+        if (node == null) return null;
+        if (node.point.equals(searchPoint)) return node;
+        if (node.isVertical)
+            if (searchPoint.x() < node.point.x())
+                if (node.lbTree.point.equals(searchPoint)) return node.lbTree;
+                else findNode(node.lbTree, searchPoint);
+            else {
+                if (node.rtTree.point.equals(searchPoint)) return node.rtTree;
+                else findNode(node.rtTree, searchPoint);
+            }
+        else {
+            if (searchPoint.y() < node.point.y())
+                if (node.lbTree.point.equals(searchPoint)) return node.lbTree;
+                else findNode(node.lbTree, searchPoint);
+            else {
+                if (node.rtTree.point.equals(searchPoint)) return node.rtTree;
+                else findNode(node.rtTree, searchPoint);
+            }
+        }
+        return null;
+    }
+
+    public boolean contains(Point2D searchPoint) {
+        if (searchPoint == null) throw new IllegalArgumentException();
+        return findNode(searchPoint) != null;
     }
 
     public void insert(Point2D insertedPoint) {
         if (insertedPoint == null) throw new IllegalArgumentException();
         if (root == null) root = new Node(insertedPoint, true);
         else insert(root, insertedPoint);
-        StdOut.print(".");
     }
 
     private void insert(Node parent, Point2D insertedPoint) {
         if (parent == null || insertedPoint == null) throw new IllegalArgumentException();
         if (parent.point.equals(insertedPoint)) return;
         if (parent.isVertical)
-            if (insertedPoint.x() > parent.point.x())
-                if (parent.rtTree == null) parent.rtTree = new Node(insertedPoint, false);
-                else insert(parent.rtTree, insertedPoint);
-            else {
+            if (insertedPoint.x() < parent.point.x())
                 if (parent.lbTree == null) parent.lbTree = new Node(insertedPoint, false);
                 else insert(parent.lbTree, insertedPoint);
+            else {
+                if (parent.rtTree == null) parent.rtTree = new Node(insertedPoint, false);
+                else insert(parent.rtTree, insertedPoint);
             }
         else {
-            if (insertedPoint.y() > parent.point.y())
-                if (parent.rtTree == null) parent.rtTree = new Node(insertedPoint, true);
-                else insert(parent.rtTree, insertedPoint);
-            else {
+            if (insertedPoint.y() < parent.point.y())
                 if (parent.lbTree == null) parent.lbTree = new Node(insertedPoint, true);
                 else insert(parent.lbTree, insertedPoint);
+            else {
+                if (parent.rtTree == null) parent.rtTree = new Node(insertedPoint, true);
+                else insert(parent.rtTree, insertedPoint);
             }
         }
     }
@@ -71,14 +99,14 @@ public class KdTree {
         if (node.isVertical) {
             if (node.lbTree != null && rect.xmin() < node.point.x())
                 range(node.lbTree, rect, pointsInRange);
-            if (node.rtTree != null && rect.xmax() > node.point.x())
+            if (node.rtTree != null && rect.xmax() >= node.point.x())
                 range(node.rtTree, rect, pointsInRange);
         }
         else {
             if (node.lbTree != null && rect.ymin() < node.point.y())
                 range(node.lbTree, rect, pointsInRange);
-            if (node.rtTree != null && rect.ymax() > node.point.y())
-                range(node.lbTree, rect, pointsInRange);
+            if (node.rtTree != null && rect.ymax() >= node.point.y())
+                range(node.rtTree, rect, pointsInRange);
         }
         return pointsInRange;
     }
