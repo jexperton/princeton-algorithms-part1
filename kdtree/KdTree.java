@@ -3,6 +3,7 @@ import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.StdDraw;
 
 import java.util.ArrayList;
+import java.util.function.Function;
 
 public class KdTree {
     private Node root;
@@ -30,26 +31,20 @@ public class KdTree {
 
     private Node findNode(Point2D searchPoint) {
         if (searchPoint == null) throw new IllegalArgumentException();
-        return findNode(root, searchPoint);
+        return findNode(root, searchPoint, true);
     }
 
-    private Node findNode(Node node, Point2D searchPoint) {
+    private Node findNode(Node node, Point2D searchPoint, boolean isVertical) {
         if (searchPoint == null) throw new IllegalArgumentException();
         if (node == null) return null;
-        if (node.point == searchPoint) return node;
-        if (node.isVertical) {
-            if (searchPoint.x() < node.point.x() && node.lbTree != null)
-                return findNode(node.lbTree, searchPoint);
-            else if (searchPoint.x() >= node.point.x() && node.rtTree != null)
-                return findNode(node.rtTree, searchPoint);
-        }
-        else {
-            if (searchPoint.y() < node.point.y() && node.lbTree != null)
-                return findNode(node.lbTree, searchPoint);
-            else if (searchPoint.y() >= node.point.y() && node.rtTree != null) {
-                return findNode(node.rtTree, searchPoint);
-            }
-        }
+        if (node.point.equals(searchPoint)) return node;
+
+        Function<Point2D, Double> getXY = isVertical ? Point2D::x : Point2D::y;
+
+        if (getXY.apply(searchPoint) < getXY.apply(node.point) && node.lbTree != null)
+            return findNode(node.lbTree, searchPoint, !isVertical);
+        else if (getXY.apply(searchPoint) >= getXY.apply(node.point) && node.rtTree != null)
+            return findNode(node.rtTree, searchPoint, !isVertical);
         return null;
     }
 

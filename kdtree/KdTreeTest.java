@@ -40,18 +40,22 @@ public class KdTreeTest extends TestCase {
     public void testNonDegeneratePoints() {
         KdTree tree = new KdTree();
         Point2D pointA = new Point2D(0.2, 0.2);
+        Point2D pointB = new Point2D(0.2, 0.2);
+
         assertEquals(tree.size(), 0);
         tree.insert(pointA);
         assertEquals(tree.size(), 1);
         tree.insert(pointA);
         assertEquals(tree.size(), 1);
+        tree.insert(pointB);
+        assertEquals(tree.size(), 1);
     }
 
     public void testContains() {
         KdTree tree = new KdTree();
-        for (Point2D p : KdTreeTest.generatePoints(10000)) {
+        for (Point2D p : KdTreeTest.generatePoints(100)) {
             tree.insert(p);
-            assertEquals(tree.contains(p), true);
+            assertEquals(tree.contains(new Point2D(p.x(), p.y())), true);
         }
     }
 
