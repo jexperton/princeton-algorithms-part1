@@ -1,6 +1,7 @@
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.StdDraw;
+import edu.princeton.cs.algs4.StdOut;
 
 import java.util.ArrayList;
 import java.util.function.Function;
@@ -55,77 +56,63 @@ public class KdTree {
 
     public void insert(Point2D insertedPoint) {
         if (insertedPoint == null) throw new IllegalArgumentException();
-        if (root == null) {
-            root = new Node(insertedPoint, true);
-            size = 1;
-        }
-        else insert(root, insertedPoint);
+        insert(root, insertedPoint, true);
     }
 
-    private void insert(Node parent, Point2D insertedPoint) {
-        if (parent == null || insertedPoint == null) throw new IllegalArgumentException();
+    private void insert(Node parent, Point2D insertedPoint, boolean isVertical) {
+        if (insertedPoint == null) throw new IllegalArgumentException();
+        if (parent == null) {
+            root = new Node(insertedPoint, isVertical);
+            size = 1;
+            return;
+        }
         if (parent.point.equals(insertedPoint)) return;
-        if (parent.isVertical)
-            if (insertedPoint.x() < parent.point.x())
-                if (parent.lbTree == null) {
-                    parent.lbTree = new Node(insertedPoint, false);
-                    size++;
-                }
-                else insert(parent.lbTree, insertedPoint);
+
+        Function<Point2D, Double> getXY = isVertical ? Point2D::x : Point2D::y;
+
+        if (getXY.apply(insertedPoint) < getXY.apply(parent.point))
+            if (parent.lbTree != null) insert(parent.lbTree, insertedPoint, !isVertical);
             else {
-                if (parent.rtTree == null) {
-                    parent.rtTree = new Node(insertedPoint, false);
-                    size++;
-                }
-                else insert(parent.rtTree, insertedPoint);
+                parent.lbTree = new Node(insertedPoint, !isVertical);
+                size++;
             }
         else {
-            if (insertedPoint.y() < parent.point.y())
-                if (parent.lbTree == null) {
-                    parent.lbTree = new Node(insertedPoint, true);
-                    size++;
-                }
-                else insert(parent.lbTree, insertedPoint);
+            if (parent.rtTree != null) insert(parent.rtTree, insertedPoint, !isVertical);
             else {
-                if (parent.rtTree == null) {
-                    parent.rtTree = new Node(insertedPoint, true);
-                    size++;
-                }
-                else insert(parent.rtTree, insertedPoint);
+                parent.rtTree = new Node(insertedPoint, !isVertical);
+                size++;
             }
         }
     }
 
     public Iterable<Point2D> range(RectHV rect) {
-        return range(root, rect, new ArrayList<>());
+        return range(root, rect, new ArrayList<>(), true);
     }
 
     private ArrayList<Point2D> range(
             Node node,
             RectHV rect,
-            ArrayList<Point2D> pointsInRange
+            ArrayList<Point2D> pointsInRange,
+            boolean isVertical
     ) {
         if (node == null) return pointsInRange;
         if (rect.contains(node.point)) pointsInRange.add(node.point);
-        if (node.isVertical) {
-            if (node.lbTree != null && rect.xmin() < node.point.x())
-                range(node.lbTree, rect, pointsInRange);
-            if (node.rtTree != null && rect.xmax() >= node.point.x())
-                range(node.rtTree, rect, pointsInRange);
-        }
-        else {
-            if (node.lbTree != null && rect.ymin() < node.point.y())
-                range(node.lbTree, rect, pointsInRange);
-            if (node.rtTree != null && rect.ymax() >= node.point.y())
-                range(node.rtTree, rect, pointsInRange);
-        }
+
+        Function<Point2D, Double> getPointXY = isVertical ? Point2D::x : Point2D::y;
+        Function<RectHV, Double> getRectMin = isVertical ? RectHV::xmin : RectHV::ymin;
+        Function<RectHV, Double> getRectMax = isVertical ? RectHV::xmax : RectHV::ymax;
+
+        if (node.lbTree != null && getRectMin.apply(rect) < getPointXY.apply(node.point))
+            range(node.lbTree, rect, pointsInRange, !isVertical);
+        if (node.rtTree != null && getRectMax.apply(rect) >= getPointXY.apply(node.point))
+            range(node.rtTree, rect, pointsInRange, !isVertical);
+
         return pointsInRange;
     }
 
     public Point2D nearest(Point2D searchPoint) {
         return nearest(root, searchPoint, null);
     }
-
 
     private Point2D nearest(
             Node node,
@@ -191,93 +178,81 @@ public class KdTree {
 
 
     public void draw() {
-        draw(root, null, null, null);
+        draw(root, true, new Point2D[0]);
     }
 
-    private void draw(Node node, Node parent, Node grandParent, Node grandGrandParent) {
+    private void draw(
+            Node node,
+            boolean isVertical,
+            Point2D[] ancestors
+    ) {
         if (node == null || node.point == null) return;
         StdDraw.setPenRadius();
+        StdDraw.setPenColor(isVertical ? StdDraw.RED : StdDraw.BLUE);
+        Function<Point2D, Double> getValue = isVertical ? Point2D::y : Point2D::x;
+        Point2D start = new Point2D(node.point.x(), 0.0);
+        Point2D end = new Point2D(node.point.x(), 1.0);
 
-        Point2D parentPoint = parent == null ? null : parent.point;
-        Point2D grandGrandParentPoint = grandGrandParent == null ? null : grandGrandParent.point;
+        if (ancestors.length > 0) {
+            start = findStart(node.point, ancestors, getValue);
+            end = findEnd(node.point, ancestors, getValue);
+        }
 
-        if (node.isVertical) {
-            StdDraw.setPenColor(StdDraw.RED);
-            if (parentPoint == null)
-                StdDraw.line(node.point.x(), 0.0, node.point.x(), 1.0);
-            else if (grandGrandParentPoint == null) {
-                if (node.point.y() < parentPoint.y())
-                    StdDraw.line(node.point.x(), 0.0, node.point.x(), parent.point.y());
-                else
-                    StdDraw.line(node.point.x(), parent.point.y(), node.point.x(), 1.0);
-            }
-            else {
-                if (node.point.y() < takeLowest(parentPoint.y(), grandGrandParentPoint.y()))
-                    StdDraw.line(
-                            node.point.x(),
-                            0.0,
-                            node.point.x(),
-                            takeLowest(parentPoint.y(), grandGrandParentPoint.y()));
-                else if (node.point.y() > takeGreatest(parentPoint.y(), grandGrandParentPoint.y()))
-                    StdDraw.line(
-                            node.point.x(),
-                            takeGreatest(parentPoint.y(), grandGrandParentPoint.y()),
-                            node.point.x(),
-                            1.0);
-                else
-                    StdDraw.line(
-                            node.point.x(),
-                            parentPoint.y(),
-                            node.point.x(),
-                            grandGrandParentPoint.y());
-            }
-        }
-        else {
-            StdDraw.setPenColor(StdDraw.BLUE);
-            if (parentPoint == null)
-                StdDraw.line(0.0, node.point.y(), 1.0, node.point.y());
-            else if (grandGrandParentPoint == null) {
-                if (node.point.x() < parentPoint.x())
-                    StdDraw.line(0.0, node.point.y(), parent.point.x(), node.point.y());
-                else
-                    StdDraw.line(parent.point.x(), node.point.y(), 1.0, node.point.y());
-            }
-            else {
-                if (node.point.x() < takeLowest(parentPoint.x(), grandGrandParentPoint.x()))
-                    StdDraw.line(
-                            0.0,
-                            node.point.y(),
-                            takeLowest(parentPoint.x(), grandGrandParentPoint.x()),
-                            node.point.y());
-                else if (node.point.x() > takeGreatest(parentPoint.x(), grandGrandParentPoint.x()))
-                    StdDraw.line(
-                            takeGreatest(parentPoint.x(), grandGrandParentPoint.x()),
-                            node.point.y(),
-                            1.0,
-                            node.point.y());
-                else
-                    StdDraw.line(
-                            parentPoint.x(),
-                            node.point.y(),
-                            grandGrandParentPoint.x(),
-                            node.point.y());
-            }
-        }
+        if (!start.equals(end)) start.drawTo(end);
 
         StdDraw.setPenRadius(0.01);
         StdDraw.setPenColor(StdDraw.BLACK);
         StdDraw.point(node.point.x(), node.point.y());
 
-        draw(node.lbTree, node, parent, grandParent);
-        draw(node.rtTree, node, parent, grandParent);
+        Point2D[] family = new Point2D[ancestors.length + 1];
+        family[0] = node.point;
+        for (int i = 0; i < ancestors.length; i++)
+            family[i + 1] = ancestors[i];
+
+        draw(node.lbTree, !isVertical, family);
+        draw(node.rtTree, !isVertical, family);
     }
 
-    private double takeLowest(double a, double b) {
-        return a > b ? b : a;
+    private static Point2D findStart(
+            Point2D point,
+            Point2D[] ancestors,
+            Function<Point2D, Double> getValue
+    ) {
+        if (getValue.apply(point) == point.y())
+            return new Point2D(point.x(), ancestors[0].y());
+        return new Point2D(ancestors[0].x(), point.y());
     }
 
-    private double takeGreatest(double a, double b) {
-        return a > b ? a : b;
+    private static Point2D findEnd(
+            Point2D point,
+            Point2D[] ancestors,
+            Function<Point2D, Double> getValue
+    ) {
+        Point2D closest = null;
+        double pointXY = getValue.apply(point);
+        double parentXY = getValue.apply(ancestors[0]);
+
+        for (int i = 1; i < ancestors.length; i++) {
+            // evaluate candidates with same orientation only: n+2, n+4, etc.
+            if (i % 2 != 0) continue;
+            double ancestorXY = getValue.apply(ancestors[i]);
+            // skip if parent and candidate are on the same side of point (lt or br)
+            if ((pointXY < parentXY && pointXY < ancestorXY)
+                    || (pointXY >= parentXY && pointXY >= ancestorXY)) continue;
+            if (closest == null)
+                closest = ancestors[i];
+            else if (Math.abs(pointXY - ancestorXY) < Math.abs(pointXY - getValue.apply(closest)))
+                closest = ancestors[i];
+        }
+        if (closest != null) StdOut.println(closest);
+        if (pointXY == point.y()) {
+            if (closest != null) return new Point2D(point.x(), closest.y());
+            return new Point2D(point.x(), parentXY <= pointXY ? 1.0 : 0.0);
+        }
+        else {
+            if (closest != null) return new Point2D(closest.x(), point.y());
+            return new Point2D(parentXY <= pointXY ? 1.0 : 0.0, point.y());
+        }
     }
 
     public static void main(String[] args) {
