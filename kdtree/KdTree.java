@@ -32,10 +32,10 @@ public class KdTree {
 
     private Node findNode(Point2D searchPoint) {
         if (searchPoint == null) throw new IllegalArgumentException();
-        return findNode(root, searchPoint, true);
+        return findNode(root, true, searchPoint);
     }
 
-    private Node findNode(Node node, Point2D searchPoint, boolean isVertical) {
+    private Node findNode(Node node, boolean isVertical, Point2D searchPoint) {
         if (searchPoint == null) throw new IllegalArgumentException();
         if (node == null) return null;
         if (node.point.equals(searchPoint)) return node;
@@ -43,9 +43,9 @@ public class KdTree {
         Function<Point2D, Double> getXY = isVertical ? Point2D::x : Point2D::y;
 
         if (getXY.apply(searchPoint) < getXY.apply(node.point) && node.lbTree != null)
-            return findNode(node.lbTree, searchPoint, !isVertical);
+            return findNode(node.lbTree, !isVertical, searchPoint);
         else if (getXY.apply(searchPoint) >= getXY.apply(node.point) && node.rtTree != null)
-            return findNode(node.rtTree, searchPoint, !isVertical);
+            return findNode(node.rtTree, !isVertical, searchPoint);
         return null;
     }
 
@@ -56,10 +56,10 @@ public class KdTree {
 
     public void insert(Point2D insertedPoint) {
         if (insertedPoint == null) throw new IllegalArgumentException();
-        insert(root, insertedPoint, true);
+        insert(root, true, insertedPoint);
     }
 
-    private void insert(Node parent, Point2D insertedPoint, boolean isVertical) {
+    private void insert(Node parent, boolean isVertical, Point2D insertedPoint) {
         if (insertedPoint == null) throw new IllegalArgumentException();
         if (parent == null) {
             root = new Node(insertedPoint, isVertical);
@@ -71,13 +71,13 @@ public class KdTree {
         Function<Point2D, Double> getXY = isVertical ? Point2D::x : Point2D::y;
 
         if (getXY.apply(insertedPoint) < getXY.apply(parent.point))
-            if (parent.lbTree != null) insert(parent.lbTree, insertedPoint, !isVertical);
+            if (parent.lbTree != null) insert(parent.lbTree, !isVertical, insertedPoint);
             else {
                 parent.lbTree = new Node(insertedPoint, !isVertical);
                 size++;
             }
         else {
-            if (parent.rtTree != null) insert(parent.rtTree, insertedPoint, !isVertical);
+            if (parent.rtTree != null) insert(parent.rtTree, !isVertical, insertedPoint);
             else {
                 parent.rtTree = new Node(insertedPoint, !isVertical);
                 size++;
@@ -86,14 +86,14 @@ public class KdTree {
     }
 
     public Iterable<Point2D> range(RectHV rect) {
-        return range(root, rect, new ArrayList<>(), true);
+        return range(root, true, rect, new ArrayList<>());
     }
 
     private ArrayList<Point2D> range(
             Node node,
+            boolean isVertical,
             RectHV rect,
-            ArrayList<Point2D> pointsInRange,
-            boolean isVertical
+            ArrayList<Point2D> pointsInRange
     ) {
         if (node == null) return pointsInRange;
         if (rect.contains(node.point)) pointsInRange.add(node.point);
@@ -103,9 +103,9 @@ public class KdTree {
         Function<RectHV, Double> getRectMax = isVertical ? RectHV::xmax : RectHV::ymax;
 
         if (node.lbTree != null && getRectMin.apply(rect) < getPointXY.apply(node.point))
-            range(node.lbTree, rect, pointsInRange, !isVertical);
+            range(node.lbTree, !isVertical, rect, pointsInRange);
         if (node.rtTree != null && getRectMax.apply(rect) >= getPointXY.apply(node.point))
-            range(node.rtTree, rect, pointsInRange, !isVertical);
+            range(node.rtTree, !isVertical, rect, pointsInRange);
 
         return pointsInRange;
     }
