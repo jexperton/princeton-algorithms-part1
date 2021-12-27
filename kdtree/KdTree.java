@@ -122,15 +122,14 @@ public class KdTree {
         if (searchPoint == null) throw new IllegalArgumentException();
         if (node == null) return nearestPoint;
         if (nearestPoint == null) nearestPoint = node.point;
+
         double nearestDistance = searchPoint.distanceSquaredTo(nearestPoint);
         boolean shouldTakeLeft = isVertical
                                  ? searchPoint.x() < node.point.x()
                                  : searchPoint.y() < node.point.y();
         double pointDistance = searchPoint.distanceSquaredTo(node.point);
-        if (pointDistance < nearestDistance) {
-            nearestPoint = node.point;
-            nearestDistance = pointDistance;
-        }
+
+        if (pointDistance < nearestDistance) nearestPoint = node.point;
 
         RectHV subGridLB =
                 isVertical
@@ -141,43 +140,38 @@ public class KdTree {
                 ? new RectHV(node.point.x(), grid.ymin(), grid.xmax(), grid.ymax())
                 : new RectHV(grid.xmin(), node.point.y(), grid.xmax(), grid.ymax());
 
-        if (shouldTakeLeft) {
-            Point2D nearestLeft = nearest(
-                    node.lbTree, !isVertical, searchPoint, nearestPoint, subGridLB);
-            double nearestLeftDistance = searchPoint.distanceSquaredTo(nearestLeft);
-            if (nearestLeftDistance < nearestDistance) {
-                nearestPoint = nearestLeft;
-                nearestDistance = nearestLeftDistance;
-            }
-            // |a-b| = |b-a| -> (a-b)² = (b-a)²
-            if (subGridRT.distanceSquaredTo(searchPoint) < nearestDistance) {
-                // might worth checking the opposite tree
-                Point2D nearestOpposite = nearest(
-                        node.rtTree, !isVertical, searchPoint, nearestPoint, subGridRT);
-                double nearestOppositeDistance = searchPoint.distanceSquaredTo(nearestOpposite);
-                if (nearestOppositeDistance < nearestDistance) {
-                    nearestPoint = nearestOpposite;
-                }
-            }
-        }
-        else {
-            Point2D nearestRight = nearest(
-                    node.rtTree, !isVertical, searchPoint, nearestPoint, subGridRT);
-            double nearestRightDistance = searchPoint.distanceSquaredTo(nearestRight);
-            if (nearestRightDistance < nearestDistance) {
-                nearestPoint = nearestRight;
-                nearestDistance = nearestRightDistance;
-            }
+        if (shouldTakeLeft)
+            return getNearestInAorB(node.lbTree, node.rtTree,
+                                    subGridLB, subGridRT,
+                                    isVertical, searchPoint, nearestPoint);
+        return getNearestInAorB(node.rtTree, node.lbTree,
+                                subGridRT, subGridLB,
+                                isVertical, searchPoint, nearestPoint);
+    }
 
-            if (subGridLB.distanceSquaredTo(searchPoint) < nearestDistance) {
-                // might worth checking the opposite tree
-                Point2D nearestOpposite = nearest(
-                        node.lbTree, !isVertical, searchPoint, nearestPoint, subGridLB);
-                double nearestOppositeDistance = searchPoint.distanceSquaredTo(nearestOpposite);
-                if (nearestOppositeDistance < nearestDistance) {
-                    nearestPoint = nearestOpposite;
-                }
-            }
+    private Point2D getNearestInAorB(
+            Node nodeA,
+            Node nodeB,
+            RectHV subGridA,
+            RectHV subGridB,
+            boolean isVertical,
+            Point2D searchPoint,
+            Point2D nearestPoint
+    ) {
+        double nearestDistance = searchPoint.distanceSquaredTo(nearestPoint);
+        Point2D nearestA = nearest(
+                nodeA, !isVertical, searchPoint, nearestPoint, subGridA);
+        double nearestADistance = searchPoint.distanceSquaredTo(nearestA);
+        if (nearestADistance < nearestDistance) {
+            nearestPoint = nearestA;
+            nearestDistance = nearestADistance;
+        }
+        if (subGridB.distanceSquaredTo(searchPoint) < nearestDistance) {
+            Point2D nearestB = nearest(
+                    nodeB, !isVertical, searchPoint, nearestPoint, subGridB);
+            double nearestBDistance = searchPoint.distanceSquaredTo(nearestB);
+            if (nearestBDistance < nearestDistance)
+                return nearestB;
         }
         return nearestPoint;
     }
